@@ -1,0 +1,1615 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#F26B1A" />
+<title>Sidekick Basecamp · Employee Operations Portal</title>
+<meta name="description" content="Sidekick Basecamp — global clocks, time tracking, leave requests, team calendar, and PH holidays for the Sidekick team." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  /* ---------- DESIGN TOKENS ---------- */
+  :root {
+    /* Sidekick brand */
+    --orange-50:  #FFF4ED;
+    --orange-100: #FFE2CC;
+    --orange-200: #FFC79A;
+    --orange-400: #FF8A3D;
+    --orange-500: #F26B1A;   /* primary brand orange */
+    --orange-600: #DA561A;
+    --orange-700: #B23E0E;
+    --orange-800: #842A09;
+    --orange-900: #5A1A05;
+
+    /* Surfaces */
+    --bg:        #F8FAFC;
+    --bg-dim:    #EEF2F7;
+    --card:      #FFFFFF;
+    --border:    #E5E9F0;
+    --border-strong: #CFD6E0;
+
+    /* Type */
+    --ink-900: #0E1726;
+    --ink-700: #1F2A3D;
+    --ink-500: #4B5668;
+    --ink-400: #6B7689;
+    --ink-300: #9099A8;
+
+    /* Effects */
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, .06);
+    --shadow-md: 0 6px 18px -8px rgba(15, 23, 42, .18), 0 2px 4px rgba(15, 23, 42, .04);
+    --shadow-lg: 0 20px 40px -20px rgba(15, 23, 42, .25), 0 8px 16px -12px rgba(15, 23, 42, .08);
+
+    --radius-sm: 10px;
+    --radius:    16px;
+    --radius-lg: 22px;
+
+    --container: 1200px;
+  }
+
+  /* ---------- RESET ---------- */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 90px; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink-900);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; }
+
+  .container {
+    width: 100%;
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* ---------- NAVBAR ---------- */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--orange-500);
+    color: #fff;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    box-shadow: 0 4px 18px -10px rgba(178, 62, 14, .55);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 20px;
+    max-width: var(--container);
+    margin: 0 auto;
+  }
+
+  /* ---------- LOGO (pure CSS, 3D stacked) ---------- */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+  }
+  .logo {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.6rem, 2.4vw, 2rem);
+    line-height: 1;
+    color: #fff;
+    letter-spacing: -0.045em;
+    text-transform: lowercase;
+    /* layered orange "drop shadow" 3D stack */
+    text-shadow:
+      1px 1px 0 var(--orange-600),
+      2px 2px 0 var(--orange-600),
+      3px 3px 0 var(--orange-700),
+      4px 4px 0 var(--orange-700),
+      5px 5px 0 var(--orange-800),
+      6px 6px 0 var(--orange-800),
+      7px 7px 0 var(--orange-900),
+      8px 8px 14px rgba(58, 16, 0, .35);
+    user-select: none;
+    transform: translateZ(0);
+  }
+  .brand-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.28);
+    color: #fff;
+    padding: 5px 9px;
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+  }
+  .brand-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(255,255,255,.35);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: .55; transform: scale(1.4); }
+  }
+
+  /* ---------- NAV LINKS ---------- */
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav-links a {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: rgba(255,255,255,.92);
+    transition: background .18s ease, color .18s ease;
+  }
+  .nav-links a:hover {
+    background: rgba(255,255,255,.18);
+    color: #fff;
+  }
+
+  .nav-toggle {
+    display: none;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    color: #fff;
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-toggle svg { width: 22px; height: 22px; }
+
+  @media (max-width: 980px) {
+    .nav-toggle { display: inline-flex; }
+    .nav-links {
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+      background: var(--orange-600);
+      padding: 14px;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      transform: translateY(-8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .nav-links.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .nav-links a { padding: 12px 16px; border-radius: 12px; }
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    background:
+      radial-gradient(1100px 380px at 20% -10%, rgba(242,107,26,.18), transparent 60%),
+      radial-gradient(900px 300px at 95% 0%, rgba(242,107,26,.10), transparent 65%),
+      var(--bg);
+    padding: 56px 0 36px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 36px;
+    align-items: end;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--orange-700);
+    background: var(--orange-50);
+    border: 1px solid var(--orange-100);
+    padding: 6px 12px;
+    border-radius: 999px;
+  }
+  .eyebrow::before {
+    content: '⚡';
+    font-size: 13px;
+  }
+  h1.hero-title {
+    margin: 18px 0 12px;
+    font-size: clamp(2rem, 4.6vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--ink-900);
+  }
+  h1.hero-title .accent { color: var(--orange-600); }
+  .hero-lead {
+    font-size: 17px;
+    color: var(--ink-500);
+    max-width: 56ch;
+    margin: 0;
+  }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 28px;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-num {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--orange-600);
+    letter-spacing: -0.02em;
+  }
+  .stat-label {
+    font-size: 12.5px;
+    color: var(--ink-500);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  .hero-meta-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow-md);
+  }
+  .hero-meta-card h4 {
+    margin: 0 0 12px;
+    font-size: 12.5px;
+    letter-spacing: .14em;
+    color: var(--ink-500);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .hero-meta-card .me-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink-900);
+    letter-spacing: -0.02em;
+  }
+  .hero-meta-card .me-date {
+    color: var(--ink-500);
+    font-size: 14.5px;
+    margin-top: 2px;
+  }
+  .hero-meta-card .me-tz {
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--orange-50);
+    color: var(--orange-700);
+    border: 1px solid var(--orange-100);
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 880px) {
+    .hero { padding: 36px 0 24px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 24px; }
+    .hero-stats { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .hero-stats { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section.block {
+    padding: 60px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  section.block:last-of-type { border-bottom: none; }
+
+  .section-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .section-head-text { max-width: 720px; }
+  .section-head h2 {
+    margin: 6px 0 4px;
+    font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .section-head p {
+    margin: 0;
+    color: var(--ink-500);
+    font-size: 16px;
+  }
+
+  /* ---------- PLAYBOOK HUB QUICK LINK ---------- */
+  .playbook-block {
+    padding: 44px 0 56px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .playbook-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 28px;
+    padding: 30px 34px;
+    background:
+      linear-gradient(135deg, var(--orange-500) 0%, var(--orange-600) 55%, var(--orange-700) 100%);
+    border-radius: var(--radius-lg);
+    color: #fff;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow:
+      0 22px 44px -18px rgba(178, 62, 14, .55),
+      0 6px 14px -8px rgba(15, 23, 42, .12),
+      inset 0 1px 0 rgba(255,255,255,.18);
+    overflow: hidden;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  /* Decorative radial glow */
+  .playbook-card::before {
+    content: '';
+    position: absolute;
+    top: -55%;
+    right: -8%;
+    width: 520px;
+    height: 520px;
+    background: radial-gradient(circle, rgba(255,255,255,.20), transparent 62%);
+    pointer-events: none;
+  }
+  /* Subtle dot pattern */
+  .playbook-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.10) 1px, transparent 0);
+    background-size: 22px 22px;
+    pointer-events: none;
+    opacity: .55;
+    mix-blend-mode: overlay;
+  }
+  .playbook-card:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 30px 56px -18px rgba(178, 62, 14, .65),
+      0 10px 18px -8px rgba(15, 23, 42, .18),
+      inset 0 1px 0 rgba(255,255,255,.22);
+  }
+  .playbook-card:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 4px;
+  }
+
+  .pb-icon-tile {
+    position: relative;
+    z-index: 1;
+    width: 92px;
+    height: 92px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.32);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    flex-shrink: 0;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.30),
+      0 8px 18px -10px rgba(0,0,0,.25);
+    transition: transform .25s ease, background .25s ease;
+  }
+  .playbook-card:hover .pb-icon-tile {
+    transform: rotate(-3deg) scale(1.04);
+    background: rgba(255,255,255,.24);
+  }
+  .pb-icon-tile svg {
+    width: 54px;
+    height: 54px;
+    display: block;
+  }
+
+  .pb-content {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+  }
+  .pb-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.30);
+    padding: 5px 11px;
+    border-radius: 999px;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .pb-eyebrow::before { content: '⚡'; font-size: 12px; }
+  .pb-title {
+    font-size: clamp(1.5rem, 2.6vw, 1.95rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin: 0 0 6px;
+    color: #fff;
+  }
+  .pb-desc {
+    font-size: 15.5px;
+    margin: 0 0 14px;
+    color: rgba(255,255,255,.92);
+    line-height: 1.5;
+    max-width: 52ch;
+  }
+  .pb-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .pb-meta span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 999px;
+    color: #fff;
+  }
+
+  .pb-cta {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    color: var(--orange-700);
+    padding: 14px 22px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    box-shadow: 0 8px 18px -6px rgba(15, 23, 42, .25);
+    transition: background .2s ease, gap .25s ease, box-shadow .2s ease;
+  }
+  .pb-cta .pb-arrow {
+    display: inline-flex;
+    transition: transform .28s ease;
+    font-weight: 800;
+  }
+  .pb-cta .pb-ext {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 6px;
+    background: var(--orange-50);
+    color: var(--orange-600);
+    font-size: 11px;
+    font-weight: 800;
+    margin-left: 2px;
+  }
+  .playbook-card:hover .pb-cta {
+    background: #FFF7F0;
+    gap: 14px;
+    box-shadow: 0 12px 22px -8px rgba(15, 23, 42, .32);
+  }
+  .playbook-card:hover .pb-arrow {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 880px) {
+    .playbook-card {
+      grid-template-columns: 1fr;
+      gap: 22px;
+      padding: 28px 22px;
+      text-align: center;
+    }
+    .pb-icon-tile { margin: 0 auto; }
+    .pb-desc { margin-left: auto; margin-right: auto; }
+    .pb-meta { justify-content: center; }
+    .pb-cta { justify-self: center; }
+  }
+
+  /* ---------- CLOCKS ---------- */
+  .region-group { margin-bottom: 34px; }
+  .region-group:last-child { margin-bottom: 0; }
+
+  .region-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .region-pill {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--orange-500);
+    color: #fff;
+    box-shadow: 0 2px 0 var(--orange-700);
+  }
+  .region-pill.emea { background: #2563EB; box-shadow: 0 2px 0 #1D4ED8; }
+  .region-pill.apac { background: #059669; box-shadow: 0 2px 0 #047857; }
+  .region-sub {
+    color: var(--ink-400);
+    font-size: 13.5px;
+    font-weight: 500;
+  }
+
+  .clock-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .clock-card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    overflow: hidden;
+  }
+  .clock-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 90px; height: 90px;
+    background: radial-gradient(circle at top right, var(--orange-50), transparent 70%);
+    pointer-events: none;
+  }
+  .clock-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--orange-200);
+  }
+  .clock-card .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    position: relative;
+  }
+  .clock-city {
+    font-weight: 700;
+    font-size: 15.5px;
+    color: var(--ink-900);
+    letter-spacing: -0.01em;
+  }
+  .clock-flag {
+    font-size: 18px;
+    line-height: 1;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,.08));
+  }
+  .clock-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink-900);
+    letter-spacing: -0.02em;
+    margin-top: 10px;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .clock-time .sec {
+    color: var(--orange-600);
+    font-size: 20px;
+    margin-left: 4px;
+  }
+  .clock-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: var(--ink-400);
+  }
+  .clock-tz {
+    font-weight: 700;
+    color: var(--ink-500);
+    letter-spacing: .04em;
+  }
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--bg-dim);
+    color: var(--ink-500);
+  }
+  .status-dot::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--ink-300);
+  }
+  .status-dot.working {
+    background: #ECFDF5;
+    color: #065F46;
+  }
+  .status-dot.working::before { background: #10B981; }
+  .status-dot.off {
+    background: #F1F5F9;
+    color: #475569;
+  }
+  .status-dot.off::before { background: #94A3B8; }
+  .status-dot.late {
+    background: #FFFBEB;
+    color: #92400E;
+  }
+  .status-dot.late::before { background: #F59E0B; }
+
+  /* ---------- IFRAME CARDS ---------- */
+  .embed-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow-md);
+  }
+  .embed-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .embed-icon {
+    width: 46px; height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--orange-500), var(--orange-600));
+    color: #fff;
+    border-radius: 14px;
+    font-size: 24px;
+    box-shadow: 0 6px 14px -6px rgba(242, 107, 26, .55);
+  }
+  .embed-title {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--ink-900);
+    letter-spacing: -0.01em;
+  }
+  .embed-sub {
+    font-size: 13.5px;
+    color: var(--ink-500);
+    margin-top: 2px;
+  }
+  .embed-tag {
+    margin-left: auto;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--orange-50);
+    color: var(--orange-700);
+    border: 1px solid var(--orange-100);
+  }
+
+  /* Responsive iframe with aspect-ratio + fallback */
+  .iframe-wrap {
+    position: relative;
+    width: 100%;
+    background: var(--bg-dim);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    overflow: hidden;
+    aspect-ratio: 16 / 11;
+    min-height: 420px;
+  }
+  .iframe-wrap iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .iframe-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--ink-400);
+    padding: 24px;
+    font-size: 14px;
+  }
+  .iframe-empty .ico {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    background: #fff;
+    color: var(--orange-600);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+  }
+  .iframe-empty code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--ink-700);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 12.5px;
+  }
+
+  @media (max-width: 600px) {
+    .iframe-wrap { aspect-ratio: 3 / 4; min-height: 520px; }
+  }
+
+  /* ---------- CALENDAR + HOLIDAYS SPLIT ---------- */
+  .split-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 22px;
+    align-items: stretch;
+  }
+  @media (max-width: 980px) {
+    .split-grid { grid-template-columns: 1fr; }
+  }
+
+  .holidays-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+  }
+  .holidays-card h3 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .holidays-card .sub {
+    font-size: 13.5px;
+    color: var(--ink-500);
+    margin-bottom: 16px;
+  }
+
+  .holiday-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    background: var(--bg-dim);
+    border-radius: 12px;
+    margin-bottom: 14px;
+  }
+  .holiday-tab {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    padding: 9px 10px;
+    border-radius: 9px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--ink-500);
+    transition: background .18s ease, color .18s ease, box-shadow .18s ease;
+  }
+  .holiday-tab.active {
+    background: #fff;
+    color: var(--orange-700);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .holiday-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 580px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .holiday-list::-webkit-scrollbar { width: 6px; }
+  .holiday-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
+
+  .holiday-item {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 12px;
+    transition: border-color .18s ease, transform .18s ease;
+  }
+  .holiday-item:hover {
+    border-color: var(--orange-200);
+    transform: translateX(2px);
+  }
+  .holiday-item.past { opacity: .55; }
+  .holiday-item.today {
+    border-color: var(--orange-500);
+    background: var(--orange-50);
+    box-shadow: 0 0 0 3px rgba(242,107,26,.15);
+  }
+
+  .h-date {
+    text-align: center;
+    background: var(--bg-dim);
+    border-radius: 8px;
+    padding: 6px 0 4px;
+    line-height: 1;
+  }
+  .h-date .m {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--orange-700);
+  }
+  .h-date .d {
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--ink-900);
+    margin-top: 2px;
+  }
+  .holiday-item.today .h-date { background: #fff; }
+  .holiday-item.today .h-date .m { color: var(--orange-700); }
+
+  .h-info { min-width: 0; }
+  .h-name {
+    font-weight: 700;
+    font-size: 14.5px;
+    color: var(--ink-900);
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .h-day {
+    font-size: 12.5px;
+    color: var(--ink-500);
+    margin-top: 1px;
+  }
+  .h-badge {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: var(--orange-50);
+    color: var(--orange-700);
+    border: 1px solid var(--orange-100);
+    white-space: nowrap;
+  }
+  .h-badge.special {
+    background: #EFF6FF;
+    color: #1D4ED8;
+    border-color: #DBEAFE;
+  }
+  .h-badge.today-pill {
+    background: var(--orange-500);
+    color: #fff;
+    border-color: var(--orange-500);
+  }
+
+  .holiday-footnote {
+    margin-top: 14px;
+    padding: 12px;
+    background: var(--bg-dim);
+    border-radius: 12px;
+    font-size: 12.5px;
+    color: var(--ink-500);
+    line-height: 1.5;
+  }
+  .holiday-footnote strong { color: var(--ink-700); }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    background: #0E1726;
+    color: #CBD5E1;
+    padding: 40px 0 28px;
+    font-size: 14px;
+  }
+  footer .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  footer .logo {
+    font-size: 1.6rem;
+    text-shadow:
+      1px 1px 0 var(--orange-600),
+      2px 2px 0 var(--orange-700),
+      3px 3px 0 var(--orange-800),
+      4px 4px 0 var(--orange-900);
+  }
+  footer .links {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+  footer .links a { color: #94A3B8; transition: color .18s; }
+  footer .links a:hover { color: #fff; }
+  footer .fine {
+    text-align: center;
+    color: #64748B;
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    font-size: 12.5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ========================= NAV ========================= -->
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top">
+      <span class="logo">sidekick</span>
+      <span class="brand-tag">Basecamp</span>
+    </a>
+
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+      </svg>
+    </button>
+
+    <nav>
+      <ul class="nav-links" id="primary-nav">
+        <li><a href="#playbook">📚 Playbook</a></li>
+        <li><a href="#clocks">🌐 Global Clocks</a></li>
+        <li><a href="#time-tracker">⏱ Time Tracker</a></li>
+        <li><a href="#leave">🏖 Leave</a></li>
+        <li><a href="#calendar">📅 Calendar</a></li>
+        <li><a href="#holidays">🇵🇭 Holidays</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- ========================= HERO ========================= -->
+<section class="hero" id="top">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow">Internal · Operations Portal</span>
+        <h1 class="hero-title">Welcome to <span class="accent">Basecamp</span>.</h1>
+        <p class="hero-lead">
+          Your single hub for the things that keep the day moving. Clock in, request leave,
+          peek at the team calendar, and stay synced across every timezone our Sidekicks operate in.
+        </p>
+
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-num">12</div>
+            <div class="stat-label">Global timezones tracked</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">3</div>
+            <div class="stat-label">Regions covered</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">18</div>
+            <div class="stat-label">PH holidays in 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="hero-meta-card" aria-label="Your local time">
+        <h4>Your local time</h4>
+        <div class="me-time" id="meTime">--:--:--</div>
+        <div class="me-date" id="meDate">Loading…</div>
+        <div class="me-tz" id="meTz">DETECTING TIMEZONE</div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= PLAYBOOK HUB QUICK LINK ========================= -->
+<section class="playbook-block" id="playbook">
+  <div class="container">
+    <a class="playbook-card"
+       href="https://paumorcs.github.io/sidekick-hub/"
+       target="_blank"
+       rel="noopener noreferrer"
+       aria-label="Open the Sidekick Playbook Hub in a new tab">
+
+      <!-- Icon tile: custom SVG playbook with lightning -->
+      <span class="pb-icon-tile" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Back stacked page -->
+          <rect x="11" y="11" width="28" height="33" rx="3" fill="rgba(255,255,255,0.35)"/>
+          <!-- Middle stacked page -->
+          <rect x="14" y="8" width="28" height="33" rx="3" fill="rgba(255,255,255,0.60)"/>
+          <!-- Front cover -->
+          <rect x="6" y="5" width="28" height="33" rx="3" fill="#FFFFFF"/>
+          <!-- Spine accent -->
+          <rect x="6" y="5" width="4" height="33" rx="1" fill="#F26B1A"/>
+          <!-- Cover text lines -->
+          <rect x="14" y="12" width="13" height="1.8" rx="0.9" fill="rgba(14,23,38,0.18)"/>
+          <rect x="14" y="16" width="9"  height="1.8" rx="0.9" fill="rgba(14,23,38,0.12)"/>
+          <!-- Lightning bolt centerpiece -->
+          <path d="M22.5 19 L15.5 29 L20 29 L17.5 35.5 L25.5 25 L21 25 Z"
+                fill="#F26B1A"
+                stroke="#B23E0E"
+                stroke-width="0.6"
+                stroke-linejoin="round"/>
+        </svg>
+      </span>
+
+      <!-- Text content -->
+      <div class="pb-content">
+        <span class="pb-eyebrow">Quick Access · External</span>
+        <h2 class="pb-title">Sidekick Playbook Hub</h2>
+        <p class="pb-desc">Access all SOPs, tools, and training guides — your zero-to-hero reference for every niche, in one place.</p>
+        <div class="pb-meta">
+          <span>13 Tools</span>
+          <span>4 Niches</span>
+          <span>Zero to Hero</span>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <span class="pb-cta" aria-hidden="true">
+        <span>Open Hub</span>
+        <span class="pb-arrow">→</span>
+        <span class="pb-ext" title="Opens in new tab">↗</span>
+      </span>
+    </a>
+  </div>
+</section>
+
+<!-- ========================= GLOBAL CLOCKS ========================= -->
+<section class="block" id="clocks">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-head-text">
+        <span class="eyebrow">🕒 Live timing</span>
+        <h2>Global Clocks</h2>
+        <p>Live, ticking digital clocks for every region we operate in — updates automatically and accounts for daylight saving time.</p>
+      </div>
+    </div>
+
+    <!-- AMER -->
+    <div class="region-group">
+      <div class="region-label">
+        <span class="region-pill">AMER</span>
+        <span class="region-sub">The Americas · 6 zones</span>
+      </div>
+      <div class="clock-grid" id="grid-amer"></div>
+    </div>
+
+    <!-- EMEA -->
+    <div class="region-group">
+      <div class="region-label">
+        <span class="region-pill emea">EMEA</span>
+        <span class="region-sub">Europe, Middle East &amp; Africa · 3 zones</span>
+      </div>
+      <div class="clock-grid" id="grid-emea"></div>
+    </div>
+
+    <!-- APAC -->
+    <div class="region-group">
+      <div class="region-label">
+        <span class="region-pill apac">APAC</span>
+        <span class="region-sub">Asia-Pacific · 3 zones</span>
+      </div>
+      <div class="clock-grid" id="grid-apac"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= TIME TRACKER ========================= -->
+<section class="block" id="time-tracker" style="background: linear-gradient(180deg, var(--bg) 0%, #fff 100%);">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-head-text">
+        <span class="eyebrow">⏱ Daily logging</span>
+        <h2>Time Tracker</h2>
+        <p>Clock in, log breaks, and submit your shift. Fill out the embedded Microsoft Form below.</p>
+      </div>
+    </div>
+
+    <div class="embed-card">
+      <div class="embed-head">
+        <span class="embed-icon">⏱</span>
+        <div>
+          <div class="embed-title">Microsoft Time Tracker Form</div>
+          <div class="embed-sub">Submit one entry per shift. Make sure your date &amp; timezone are correct.</div>
+        </div>
+        <span class="embed-tag">Microsoft Forms</span>
+      </div>
+
+      <!-- Replace src="#" below with your Microsoft Time Tracker Form embed URL -->
+      <div class="iframe-wrap">
+        <iframe src="https://forms.office.com/Pages/ResponsePage.aspx?id=J_FjnsLLx0i_gCVUsdJiTtKF7QDmGUtHmk4UNYNhPutUODlVS0pXSUs5MUkzOFQ1TjY1REtTU1g4MS4u" title="Microsoft Time Tracker Form" loading="lazy" allowfullscreen></iframe>
+        <div class="iframe-empty" data-empty>
+          <div class="ico">⏱</div>
+          <strong style="color: var(--ink-700); font-size: 15px;">Embed your Time Tracker form</strong>
+          <div style="margin-top: 6px;">Paste your Microsoft Forms embed URL into the <code>src</code> attribute of the iframe above.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= LEAVE MANAGEMENT ========================= -->
+<section class="block" id="leave">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-head-text">
+        <span class="eyebrow">🏖 Time off</span>
+        <h2>Leave Management</h2>
+        <p>Plan ahead. Submit your leave request at least 3 business days before your intended start date when possible.</p>
+      </div>
+    </div>
+
+    <div class="embed-card">
+      <div class="embed-head">
+        <span class="embed-icon">🏖</span>
+        <div>
+          <div class="embed-title">Microsoft Leave Request Form</div>
+          <div class="embed-sub">Vacation, sick, emergency, and unpaid leave applications.</div>
+        </div>
+        <span class="embed-tag">Microsoft Forms</span>
+      </div>
+
+      <!-- Replace src="#" below with your Microsoft Leave Request Form embed URL -->
+      <div class="iframe-wrap">
+        <iframe src="https://forms.office.com/Pages/ResponsePage.aspx?id=J_FjnsLLx0i_gCVUsdJiTtKF7QDmGUtHmk4UNYNhPutUMTFJMkhSQlBHTzg0RVMzNzRXS1FTME9YNS4u" title="Microsoft Leave Request Form" loading="lazy" allowfullscreen></iframe>
+        <div class="iframe-empty" data-empty>
+          <div class="ico">🏖</div>
+          <strong style="color: var(--ink-700); font-size: 15px;">Embed your Leave Request form</strong>
+          <div style="margin-top: 6px;">Paste your Microsoft Forms embed URL into the <code>src</code> attribute of the iframe above.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= CALENDAR + PH HOLIDAYS ========================= -->
+<section class="block" id="calendar" style="background: linear-gradient(180deg, #fff 0%, var(--bg) 100%);">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-head-text">
+        <span class="eyebrow">📅 Plan the week</span>
+        <h2>Team Calendar &amp; PH Holidays</h2>
+        <p>The shared team calendar lives on the left. On the right, the official 2026 Philippine holidays from Proclamation No. 1006.</p>
+      </div>
+    </div>
+
+    <div class="split-grid">
+      <!-- Team Calendar -->
+      <div class="embed-card">
+        <div class="embed-head">
+          <span class="embed-icon">📅</span>
+          <div>
+            <div class="embed-title">Team Calendar</div>
+            <div class="embed-sub">Shifts, meetings, OOO, and team events at a glance.</div>
+          </div>
+          <span class="embed-tag">Google / Outlook</span>
+        </div>
+
+        <!-- Replace src="#" with your shared Google or Outlook calendar embed URL -->
+        <div class="iframe-wrap" style="aspect-ratio: 4 / 3; min-height: 460px;">
+          <iframe src="#" title="Shared Team Calendar" loading="lazy" allowfullscreen></iframe>
+          <div class="iframe-empty" data-empty>
+            <div class="ico">📅</div>
+            <strong style="color: var(--ink-700); font-size: 15px;">Embed your team calendar</strong>
+            <div style="margin-top: 6px;">Paste your Google / Outlook calendar embed URL into the <code>src</code> attribute.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PH Holidays -->
+      <div class="holidays-card" id="holidays">
+        <h3>🇵🇭 2026 Philippine Holidays</h3>
+        <div class="sub">Per Proclamation No. 1006 issued by the Office of the President.</div>
+
+        <div class="holiday-tabs" role="tablist">
+          <button class="holiday-tab active" data-filter="regular" role="tab">Regular Holidays</button>
+          <button class="holiday-tab" data-filter="special" role="tab">Special Non-Working</button>
+        </div>
+
+        <ul class="holiday-list" id="holidayList" role="list"></ul>
+
+        <div class="holiday-footnote">
+          <strong>📌 Note:</strong> <strong>Feb 25, 2026 (Wed)</strong> is a <em>special working day</em> commemorating the 40th anniversary of the EDSA People Power Revolution. Dates for <strong>Eidul Fitr</strong> and <strong>Eidul Adha</strong> will be proclaimed separately based on the Islamic calendar.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= FOOTER ========================= -->
+<footer>
+  <div class="container">
+    <div class="foot">
+      <a href="#top" class="brand">
+        <span class="logo">sidekick</span>
+        <span class="brand-tag" style="background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.15);">Basecamp</span>
+      </a>
+      <nav class="links">
+        <a href="#playbook">Playbook</a>
+        <a href="#clocks">Clocks</a>
+        <a href="#time-tracker">Time Tracker</a>
+        <a href="#leave">Leave</a>
+        <a href="#calendar">Calendar</a>
+        <a href="#holidays">Holidays</a>
+      </nav>
+    </div>
+    <div class="fine">
+      Sidekick Basecamp · Internal Operations Portal · <span id="footYear">2026</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ========================= SCRIPTS ========================= -->
+<script>
+  /* ============================================================
+   * 1) MOBILE NAV TOGGLE
+   * ============================================================ */
+  (function() {
+    var btn  = document.querySelector('.nav-toggle');
+    var list = document.getElementById('primary-nav');
+    if (!btn || !list) return;
+    btn.addEventListener('click', function() {
+      var open = list.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    list.addEventListener('click', function(e) {
+      if (e.target.tagName === 'A') list.classList.remove('open');
+    });
+  })();
+
+  /* ============================================================
+   * 2) GLOBAL CLOCKS
+   *    Uses Intl.DateTimeFormat to handle DST automatically.
+   * ============================================================ */
+  var clocks = {
+    amer: [
+      { city: 'Eastern',   country: 'New York',     flag: '🇺🇸', tz: 'America/New_York'    },
+      { city: 'Central',   country: 'Chicago',      flag: '🇺🇸', tz: 'America/Chicago'     },
+      { city: 'Mountain',  country: 'Denver',       flag: '🇺🇸', tz: 'America/Denver'      },
+      { city: 'Pacific',   country: 'Los Angeles',  flag: '🇺🇸', tz: 'America/Los_Angeles' },
+      { city: 'Alaska',    country: 'Anchorage',    flag: '🇺🇸', tz: 'America/Anchorage'   },
+      { city: 'Hawaii',    country: 'Honolulu',     flag: '🇺🇸', tz: 'Pacific/Honolulu'    }
+    ],
+    emea: [
+      { city: 'London',    country: 'United Kingdom', flag: '🇬🇧', tz: 'Europe/London' },
+      { city: 'Paris',     country: 'France',         flag: '🇫🇷', tz: 'Europe/Paris'  },
+      { city: 'Dubai',     country: 'UAE',            flag: '🇦🇪', tz: 'Asia/Dubai'    }
+    ],
+    apac: [
+      { city: 'Manila',    country: 'Philippines / Singapore', flag: '🇵🇭', tz: 'Asia/Manila' },
+      { city: 'Tokyo',     country: 'Japan',                   flag: '🇯🇵', tz: 'Asia/Tokyo'  },
+      { city: 'Sydney',    country: 'Australia',               flag: '🇦🇺', tz: 'Australia/Sydney' }
+    ]
+  };
+
+  /* Build clock cards once on load */
+  function buildClockCards(region, list) {
+    var grid = document.getElementById('grid-' + region);
+    if (!grid) return;
+    var html = '';
+    list.forEach(function(c, i) {
+      html += '<article class="clock-card" data-tz="' + c.tz + '" data-i="' + region + '-' + i + '">' +
+              '  <div class="row">' +
+              '    <div class="clock-city">' + c.city + '</div>' +
+              '    <span class="clock-flag" aria-hidden="true">' + c.flag + '</span>' +
+              '  </div>' +
+              '  <div class="clock-time" data-time>--:--:--</div>' +
+              '  <div class="clock-meta">' +
+              '    <span class="clock-tz" data-tz-label>—</span>' +
+              '    <span class="status-dot" data-status>—</span>' +
+              '  </div>' +
+              '  <div class="clock-meta" style="margin-top: 4px;">' +
+              '    <span style="font-size: 12px;">' + c.country + '</span>' +
+              '    <span data-date style="font-size: 12px;">—</span>' +
+              '  </div>' +
+              '</article>';
+    });
+    grid.innerHTML = html;
+  }
+  buildClockCards('amer', clocks.amer);
+  buildClockCards('emea', clocks.emea);
+  buildClockCards('apac', clocks.apac);
+
+  /* Cached formatters per timezone for performance */
+  var timeFmtCache = {};
+  var dateFmtCache = {};
+  var partsFmtCache = {};
+
+  function getTimeFmt(tz) {
+    if (!timeFmtCache[tz]) {
+      timeFmtCache[tz] = new Intl.DateTimeFormat('en-GB', {
+        timeZone: tz,
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false
+      });
+    }
+    return timeFmtCache[tz];
+  }
+  function getDateFmt(tz) {
+    if (!dateFmtCache[tz]) {
+      dateFmtCache[tz] = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz,
+        weekday: 'short', month: 'short', day: '2-digit'
+      });
+    }
+    return dateFmtCache[tz];
+  }
+  function getPartsFmt(tz) {
+    if (!partsFmtCache[tz]) {
+      partsFmtCache[tz] = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz,
+        hour: 'numeric', hour12: false, timeZoneName: 'short'
+      });
+    }
+    return partsFmtCache[tz];
+  }
+
+  function getTzAbbreviation(tz, now) {
+    try {
+      var parts = getPartsFmt(tz).formatToParts(now);
+      var tzPart = parts.find(function(p) { return p.type === 'timeZoneName'; });
+      return tzPart ? tzPart.value : tz.split('/').pop();
+    } catch(e) { return tz.split('/').pop(); }
+  }
+
+  function getHourInTz(tz, now) {
+    try {
+      var parts = getPartsFmt(tz).formatToParts(now);
+      var hPart = parts.find(function(p) { return p.type === 'hour'; });
+      return hPart ? parseInt(hPart.value, 10) : 0;
+    } catch(e) { return 0; }
+  }
+
+  function statusForHour(h) {
+    // Working hours: 09:00–17:59 local
+    if (h >= 9 && h < 18)  return { cls: 'working', label: 'Working hours' };
+    if (h >= 18 && h < 22) return { cls: 'late',    label: 'After hours'  };
+    return { cls: 'off',  label: 'Off hours' };
+  }
+
+  function updateAllClocks() {
+    var now = new Date();
+
+    /* Update each clock card */
+    document.querySelectorAll('.clock-card').forEach(function(card) {
+      var tz = card.getAttribute('data-tz');
+      try {
+        var timeStr = getTimeFmt(tz).format(now); // "HH:MM:SS"
+        var dateStr = getDateFmt(tz).format(now);
+        var tzAbbr  = getTzAbbreviation(tz, now);
+        var hour    = getHourInTz(tz, now);
+        var status  = statusForHour(hour);
+
+        // Split seconds for accent color
+        var parts = timeStr.split(':');
+        var hhmm  = parts[0] + ':' + parts[1];
+        var ss    = parts[2] || '00';
+
+        card.querySelector('[data-time]').innerHTML =
+          hhmm + '<span class="sec">:' + ss + '</span>';
+        card.querySelector('[data-tz-label]').textContent = tzAbbr;
+        card.querySelector('[data-date]').textContent = dateStr;
+
+        var dot = card.querySelector('[data-status]');
+        dot.className = 'status-dot ' + status.cls;
+        dot.textContent = status.label;
+      } catch(e) {
+        card.querySelector('[data-time]').textContent = 'n/a';
+      }
+    });
+
+    /* Update "your local time" card */
+    var localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    var meTime = document.getElementById('meTime');
+    var meDate = document.getElementById('meDate');
+    var meTz   = document.getElementById('meTz');
+    if (meTime) {
+      meTime.textContent = new Intl.DateTimeFormat('en-GB', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+      }).format(now);
+    }
+    if (meDate) {
+      meDate.textContent = new Intl.DateTimeFormat('en-US', {
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+      }).format(now);
+    }
+    if (meTz) {
+      var abbr = getTzAbbreviation(localTz, now);
+      meTz.textContent = (localTz.replace(/_/g, ' ')) + ' · ' + abbr;
+    }
+  }
+
+  updateAllClocks();
+  setInterval(updateAllClocks, 1000);
+
+  /* ============================================================
+   * 3) IFRAME PLACEHOLDER HANDLING
+   *    Show empty-state overlay when src is '#' or empty.
+   * ============================================================ */
+  document.querySelectorAll('.iframe-wrap').forEach(function(wrap) {
+    var iframe = wrap.querySelector('iframe');
+    var empty  = wrap.querySelector('[data-empty]');
+    if (!iframe || !empty) return;
+    var src = iframe.getAttribute('src') || '';
+    if (!src || src === '#' || src.trim() === '') {
+      iframe.style.display = 'none';
+      empty.style.display = 'flex';
+    } else {
+      empty.style.display = 'none';
+    }
+  });
+
+  /* ============================================================
+   * 4) PH HOLIDAYS 2026 (Proclamation No. 1006)
+   * ============================================================ */
+  var PH_HOLIDAYS = {
+    regular: [
+      { d: '2026-01-01', name: "New Year's Day" },
+      { d: '2026-04-02', name: 'Maundy Thursday' },
+      { d: '2026-04-03', name: 'Good Friday' },
+      { d: '2026-04-09', name: 'Araw ng Kagitingan' },
+      { d: '2026-05-01', name: 'Labor Day' },
+      { d: '2026-06-12', name: 'Independence Day' },
+      { d: '2026-08-31', name: 'National Heroes Day' },
+      { d: '2026-11-30', name: 'Bonifacio Day' },
+      { d: '2026-12-25', name: 'Christmas Day' },
+      { d: '2026-12-30', name: 'Rizal Day' }
+    ],
+    special: [
+      { d: '2026-02-17', name: 'Chinese New Year' },
+      { d: '2026-04-04', name: 'Black Saturday' },
+      { d: '2026-08-21', name: 'Ninoy Aquino Day' },
+      { d: '2026-11-01', name: "All Saints' Day" },
+      { d: '2026-11-02', name: "All Souls' Day" },
+      { d: '2026-12-08', name: 'Feast of the Immaculate Conception' },
+      { d: '2026-12-24', name: 'Christmas Eve' },
+      { d: '2026-12-31', name: 'Last Day of the Year' }
+    ]
+  };
+
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  function renderHolidays(category) {
+    var list = document.getElementById('holidayList');
+    if (!list) return;
+
+    var items = PH_HOLIDAYS[category];
+    var today = new Date();
+    var todayY = today.getFullYear(),
+        todayM = today.getMonth(),
+        todayD = today.getDate();
+
+    var html = items.map(function(h) {
+      var parts = h.d.split('-');
+      var year  = parseInt(parts[0], 10);
+      var month = parseInt(parts[1], 10) - 1;
+      var day   = parseInt(parts[2], 10);
+      // Construct in local time so date label matches PH context
+      var dt = new Date(year, month, day);
+
+      var isToday = (year === todayY && month === todayM && day === todayD);
+      var isPast  = (dt < new Date(todayY, todayM, todayD)) && !isToday;
+
+      var dayName = DAYS[dt.getDay()];
+      var monLbl  = MONTHS[month];
+      var dayLbl  = day.toString().padStart(2, '0');
+
+      var badge = category === 'regular'
+        ? '<span class="h-badge">Regular</span>'
+        : '<span class="h-badge special">Special</span>';
+      if (isToday) badge = '<span class="h-badge today-pill">Today</span>';
+
+      return '' +
+        '<li class="holiday-item' + (isPast ? ' past' : '') + (isToday ? ' today' : '') + '">' +
+        '  <div class="h-date">' +
+        '    <div class="m">' + monLbl + '</div>' +
+        '    <div class="d">' + dayLbl + '</div>' +
+        '  </div>' +
+        '  <div class="h-info">' +
+        '    <div class="h-name">' + h.name + '</div>' +
+        '    <div class="h-day">' + dayName + ' · 2026</div>' +
+        '  </div>' +
+        '  ' + badge +
+        '</li>';
+    }).join('');
+
+    list.innerHTML = html;
+  }
+
+  /* Tab switching */
+  document.querySelectorAll('.holiday-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.holiday-tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      renderHolidays(tab.getAttribute('data-filter'));
+    });
+  });
+
+  renderHolidays('regular');
+
+  /* ============================================================
+   * 5) FOOTER YEAR
+   * ============================================================ */
+  document.getElementById('footYear').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
